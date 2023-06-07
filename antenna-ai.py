@@ -11,8 +11,8 @@ import argparse
 from pathlib import Path
 import json
 
-wandb.login(key='7d128b1af6ed0cbb4897a398ed4dc3196c828387')
-wandb.init(project="dfsdfsd", entity="_zelda_")
+wandb.login(key='24105b2510470e8d99c2a27e9d5c53f3934aa355')
+wandb.init(project="Antenna_model", entity="vojta-bednarsky")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Process some integers.')
