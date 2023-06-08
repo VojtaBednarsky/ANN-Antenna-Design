@@ -1,0 +1,16 @@
+method: grid
+metric:
+  goal: minimize
+  name: val_root_mean_squared_error
+parameters:
+  u:
+    values:
+      - 2
+      - 4
+      - 6
+  u2:
+    values:
+      - 2
+      - 4
+      - 6
+program: antenna-ai.py
