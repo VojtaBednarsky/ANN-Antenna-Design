@@ -11,6 +11,9 @@ import argparse
 from pathlib import Path
 import json
 
+# visibility of the settings weights and more other parameters
+#https://netron.app/
+
 wandb.login(key='24105b2510470e8d99c2a27e9d5c53f3934aa355')
 wandb.init(project="Antenna_model", entity="vojta-bednarsky")
 
@@ -26,9 +29,10 @@ if __name__ == "__main__":
     parser.add_argument('--af2', type=str, default='relu', help='Activation function for all layers')
     parser.add_argument('--u', type=int, default=64, help='Number of neurons in first hidden layer')
     parser.add_argument('--u2', type=int, default=64, help='Number of neurons in second hidden layer')
+    parser.add_argument('--layers', type=int, default=2, help='Number of hidden layers')
     config = vars(parser.parse_args())
 
-    run_name = 'run'
+    run_name = 'sweep'
     save_dir = Path('training')
     if not save_dir.exists():
         os.mkdir(save_dir)
@@ -51,8 +55,10 @@ if __name__ == "__main__":
     m = config['m']
     lr_decay = config['lr_decay']
     af = config['af']
+    af2 = config['af2']
     u = config['u']
     u2 = config['u2']
+    layers = config['layers']
     wandb.log(dict(config))
 
     if opt_name == 'Adam':
@@ -68,10 +74,6 @@ if __name__ == "__main__":
     else:
         print(f'Incorrect optimizer names')
         exit()
-
-
-    # visibility of the settings weights and more other parameters
-    #https://netron.app/
 
     # import PDE dataset
     # [import datasetu + nutnost oddělovače]
@@ -108,10 +110,15 @@ if __name__ == "__main__":
     # add an input layer with 2 input nodes
     model.add(Input(shape=(2,)))
     # add a dense layer with l nodes and ReLU activation function
-    # for _ in range(layers):
-    model.add(Dense(units=u, activation=af, kernel_initializer=initializer))
+    
+    af = [af, af2]
+    u = [u, u2]
+    
+    for i in range(layers):
+        model.add(Dense(units=u[i], activation=af[i], kernel_initializer=initializer))
+    
     # add another dense layer with 200 nodes and ReLU activation function
-    model.add(Dense(units=u2, activation='relu', kernel_initializer=initializer))
+    # model.add(Dense(units=u2, activation='af2', kernel_initializer=initializer))
               #       kernel_regularizer=regularizers.L1L2(l1=1e-5, l2=1e-4),
               #       bias_regularizer=regularizers.L2(1e-4),
               #       activity_regularizer=regularizers.L2(1e-5)))
@@ -125,7 +132,7 @@ if __name__ == "__main__":
     # create a root mean squared error metric to evaluate the model performance
     m = keras.metrics.RootMeanSquaredError()
     # create a categorical crossentropy loss function to train the model
-    loss = keras.losses.CategoricalCrossentropy()
+    loss = keras.losses.MeanSquaredError()
 
     # compile the model with the specified optimizer, loss function and metric
     model.compile(optimizer=opt, loss=[loss], metrics=[m])
@@ -145,4 +152,5 @@ if __name__ == "__main__":
 
     # print the best root mean squared error and the number of nodes in the first dense layer (l)
     print(f'RMSE:{best_rmse:.3f} with L-{l}')
-    wandb.log({"val_RMSE": best_rmse})
+    wandb.log({"val_RMSE": best_rmse, 'save_dir': save_dir})
+    # os.rename(save_dir, f'{save_dir}_{best_rmse:.3f}')

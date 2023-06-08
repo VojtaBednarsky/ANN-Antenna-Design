@@ -3,14 +3,42 @@ metric:
   goal: minimize
   name: val_root_mean_squared_error
 parameters:
+  af2:
+    values:
+      - relu
+      - sigmoid
+      - selu
+      - elu
+  af:
+    values:
+      - relu
+      - sigmoid
+      - selu
+      - elu
+  layers:
+    values:
+      - 1
+      - 5
+      - 10
+      - 20
+  opt:
+    values:
+      - Adam
+      - SGD
+      - Adagrad
+      - RMSprop
+      - Adamax
   u:
     values:
-      - 2
-      - 4
-      - 6
+      - 16
+      - 32
+      - 64
+      - 128
   u2:
     values:
-      - 2
-      - 4
-      - 6
+      - 16
+      - 32
+      - 64
+      - 128
+
 program: antenna-ai.py
