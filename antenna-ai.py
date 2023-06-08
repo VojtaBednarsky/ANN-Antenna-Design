@@ -152,5 +152,5 @@ if __name__ == "__main__":
 
     # print the best root mean squared error and the number of nodes in the first dense layer (l)
     print(f'RMSE:{best_rmse:.3f} with L-{l}')
-    wandb.log({"val_RMSE": best_rmse, 'save_dir': save_dir})
+    wandb.log({"val_RMSE": best_rmse})
     # os.rename(save_dir, f'{save_dir}_{best_rmse:.3f}')
