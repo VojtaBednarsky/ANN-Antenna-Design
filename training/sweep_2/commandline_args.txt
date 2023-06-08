@@ -6,8 +6,8 @@
   "m": 0.0,
   "lr_decay": 0.5,
   "af": "relu",
-  "af2": "relu",
-  "u": 64,
-  "u2": 64,
-  "layers": 2
+  "af2": "tanh",
+  "u": 128,
+  "u2": 16,
+  "layers": 5
 }

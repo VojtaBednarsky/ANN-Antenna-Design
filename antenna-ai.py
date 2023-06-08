@@ -26,10 +26,12 @@ if __name__ == "__main__":
     parser.add_argument('--m', type=float, default=0.0, help='Momentum for SDG optimizer')
     parser.add_argument('--lr_decay', type=float, default=0.5, help='Learning rate decay')
     parser.add_argument('--af', type=str, default='relu', help='Activation function for all layers')
-    parser.add_argument('--af2', type=str, default='relu', help='Activation function for all layers')
-    parser.add_argument('--u', type=int, default=64, help='Number of neurons in first hidden layer')
-    parser.add_argument('--u2', type=int, default=64, help='Number of neurons in second hidden layer')
-    parser.add_argument('--layers', type=int, default=2, help='Number of hidden layers')
+    parser.add_argument('--af2', type=str, default='tanh', help='Activation function for all layers')
+    parser.add_argument('--u', type=int, default=128, help='Number of neurons in first hidden layer')
+    parser.add_argument('--u2', type=int, default=16, help='Number of neurons in second hidden layer')
+    parser.add_argument('--layers', type=int, default=5, help='Number of hidden layers')
+    parser.add_argument('--met', type=str, default='RMSE', help='Metrics')
+    parser.add_argument('--loss', type=str, default='MSE', help='Losses')
     config = vars(parser.parse_args())
 
     run_name = 'sweep'
@@ -59,21 +61,9 @@ if __name__ == "__main__":
     u = config['u']
     u2 = config['u2']
     layers = config['layers']
+    met_name = config['met']
+    loss_name = config['loss']
     wandb.log(dict(config))
-
-    if opt_name == 'Adam':
-        opt = keras.optimizers.Adam(learning_rate=lr)
-    elif opt_name == 'SGD':
-        opt = keras.optimizers.SGD(learning_rate=lr, momentum=m)
-    elif opt_name == 'Adagrad':
-        opt = keras.optimizers.Adagrad(learning_rate=lr)
-    elif opt_name == 'RMSprop':
-        opt = keras.optimizers.RMSprop(learning_rate=lr)
-    elif opt_name == 'Adamax':
-        opt = keras.optimizers.Adamax(learning_rate=lr)
-    else:
-        print(f'Incorrect optimizer names')
-        exit()
 
     # import PDE dataset
     # [import datasetu + nutnost oddělovače]
@@ -111,8 +101,8 @@ if __name__ == "__main__":
     model.add(Input(shape=(2,)))
     # add a dense layer with l nodes and ReLU activation function
     
-    af = [af, af2]
-    u = [u, u2]
+    af = [af, af2,af,af2,af,af2]
+    u = [u, u2,u,u2,u,u2]
     
     for i in range(layers):
         model.add(Dense(units=u[i], activation=af[i], kernel_initializer=initializer))
@@ -122,17 +112,53 @@ if __name__ == "__main__":
               #       kernel_regularizer=regularizers.L1L2(l1=1e-5, l2=1e-4),
               #       bias_regularizer=regularizers.L2(1e-4),
               #       activity_regularizer=regularizers.L2(1e-5)))
+    
     # add a dropout layer to prevent overfitting
     model.add(Dropout(.10))
     # add a dense output layer with 100 nodes and softmax activation function
     model.add(Dense(units=100, activation='sigmoid', kernel_initializer=initializer))
 
-    # create an Adam optimizer with the specified learning rate
-    opt = keras.optimizers.Adam(learning_rate=lr)
-    # create a root mean squared error metric to evaluate the model performance
-    m = keras.metrics.RootMeanSquaredError()
-    # create a categorical crossentropy loss function to train the model
-    loss = keras.losses.MeanSquaredError()
+    # choose optimizer with the specified learning rate
+    # opt = keras.optimizers.Adam(learning_rate=lr)
+    if opt_name == 'Adam':
+        opt = keras.optimizers.Adam(learning_rate=lr)
+    elif opt_name == 'SGD':
+        opt = keras.optimizers.SGD(learning_rate=lr, momentum=m)
+    elif opt_name == 'Adagrad':
+        opt = keras.optimizers.Adagrad(learning_rate=lr)
+    elif opt_name == 'RMSprop':
+        opt = keras.optimizers.RMSprop(learning_rate=lr)
+    elif opt_name == 'Adamax':
+        opt = keras.optimizers.Adamax(learning_rate=lr)
+    else:
+        print(f'Incorrect optimizer names')
+        exit()
+
+    
+    # choose metric to evaluate the model performance
+    # m = keras.metrics.RootMeanSquaredError()
+    if met_name == 'MAE':
+        m = keras.metrics.MeanAbsoluteError()
+    elif met_name == 'MSE':
+        m = keras.metrics.MeanSquaredError()
+    elif met_name == 'RMSE':
+        m = keras.metrics.RootMeanSquaredError()
+    else:
+        print(f'Incorrect metrics names')
+        exit()
+
+    # choose loss function to train the model
+    # loss = keras.losses.MeanSquaredError()
+    if loss_name == 'lMSE':
+        loss = keras.losses.MeanSquaredError()
+    elif loss_name == 'lMAE':
+        loss = keras.losses.MeanAbsoluteError()
+    elif loss_name == 'lLC':
+        loss = keras.losses.LogCosh()
+    else:
+        print(f'Incorrect loss names')
+        # exit()
+
 
     # compile the model with the specified optimizer, loss function and metric
     model.compile(optimizer=opt, loss=[loss], metrics=[m])
