@@ -17,13 +17,12 @@ parameters:
       - selu 
 
   layers:
-    	min: 1
-    	max: 5
+    min: 1
+    max: 5
   opt:
     values:
       - Adam
       - SGD
-      - Adagrad
       - RMSprop
       - Adamax
   u:
@@ -39,12 +38,13 @@ parameters:
       - 128
   met:
     values:
-      - MAE
+      - BACC
       - MSE
-      - RMSE
- loss:
+      - PREC
+      - F1
+  loss:
     values:
-      - lMAE
+      - lBCross
       - lMSE
       - lLC 
   

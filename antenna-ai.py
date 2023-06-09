@@ -10,6 +10,7 @@ from wandb.keras import WandbCallback
 import argparse
 from pathlib import Path
 import json
+import sys
 
 # visibility of the settings weights and more other parameters
 #https://netron.app/
@@ -25,13 +26,13 @@ if __name__ == "__main__":
     parser.add_argument('--opt', type=str, default='Adamax', help='Optimizer')
     parser.add_argument('--m', type=float, default=0.0, help='Momentum for SDG optimizer')
     parser.add_argument('--lr_decay', type=float, default=0.5, help='Learning rate decay')
-    parser.add_argument('--af', type=str, default='relu', help='Activation function for all layers')
+    parser.add_argument('--af', type=str, default='tanh', help='Activation function for all layers')
     parser.add_argument('--af2', type=str, default='tanh', help='Activation function for all layers')
     parser.add_argument('--u', type=int, default=128, help='Number of neurons in first hidden layer')
     parser.add_argument('--u2', type=int, default=16, help='Number of neurons in second hidden layer')
     parser.add_argument('--layers', type=int, default=5, help='Number of hidden layers')
-    parser.add_argument('--met', type=str, default='RMSE', help='Metrics')
-    parser.add_argument('--loss', type=str, default='MSE', help='Losses')
+    parser.add_argument('--met', type=str, default='BACC', help='Metrics')
+    parser.add_argument('--loss', type=str, default='lBCross', help='Losses')
     config = vars(parser.parse_args())
 
     run_name = 'sweep'
@@ -101,11 +102,15 @@ if __name__ == "__main__":
     model.add(Input(shape=(2,)))
     # add a dense layer with l nodes and ReLU activation function
     
-    af = [af, af2,af,af2,af,af2]
-    u = [u, u2,u,u2,u,u2]
-    
     for i in range(layers):
-        model.add(Dense(units=u[i], activation=af[i], kernel_initializer=initializer))
+        if i % 2 == 1:  # Check if the index is odd
+            activation = config['af']
+            units = config['u']
+        else:
+            activation = config['af2']
+            units = config['u2']
+        
+        model.add(Dense(units=units, activation=activation, kernel_initializer=initializer))
     
     # add another dense layer with 200 nodes and ReLU activation function
     # model.add(Dense(units=u2, activation='af2', kernel_initializer=initializer))
@@ -118,8 +123,7 @@ if __name__ == "__main__":
     # add a dense output layer with 100 nodes and softmax activation function
     model.add(Dense(units=100, activation='sigmoid', kernel_initializer=initializer))
 
-    # choose optimizer with the specified learning rate
-    # opt = keras.optimizers.Adam(learning_rate=lr)
+    # Choose the optimizer with the specified learning rate
     if opt_name == 'Adam':
         opt = keras.optimizers.Adam(learning_rate=lr)
     elif opt_name == 'SGD':
@@ -131,39 +135,37 @@ if __name__ == "__main__":
     elif opt_name == 'Adamax':
         opt = keras.optimizers.Adamax(learning_rate=lr)
     else:
-        print(f'Incorrect optimizer names')
-        exit()
-
+        print('Incorrect optimizer names')
+        sys.exit()
     
-    # choose metric to evaluate the model performance
-    # m = keras.metrics.RootMeanSquaredError()
-    if met_name == 'MAE':
-        m = keras.metrics.MeanAbsoluteError()
-    elif met_name == 'MSE':
-        m = keras.metrics.MeanSquaredError()
-    elif met_name == 'RMSE':
-        m = keras.metrics.RootMeanSquaredError()
+    # Choose the metric to evaluate the model performance
+    if met_name == 'BACC':
+        m = keras.metrics.BinaryAccuracy()
+    # elif met_name == 'MSE':
+    #     m = keras.metrics.MeanSquaredError()
+    elif met_name == 'PREC':
+        m = tf.keras.metrics.Precision()
+    elif met_name == 'F1':
+        m = tf.keras.metrics.F1Score(num_classes=2)
     else:
-        print(f'Incorrect metrics names')
-        exit()
-
-    # choose loss function to train the model
-    # loss = keras.losses.MeanSquaredError()
-    if loss_name == 'lMSE':
-        loss = keras.losses.MeanSquaredError()
+        print('Incorrect metrics names')
+        sys.exit()
+    
+    # Choose the loss function to train the model
+    if loss_name == 'lBCross':
+        loss = keras.losses.BinaryCrossentropy()
     elif loss_name == 'lMAE':
         loss = keras.losses.MeanAbsoluteError()
     elif loss_name == 'lLC':
         loss = keras.losses.LogCosh()
     else:
-        print(f'Incorrect loss names')
-        # exit()
-
-
-    # compile the model with the specified optimizer, loss function and metric
-    model.compile(optimizer=opt, loss=[loss], metrics=[m])
-
-    # create a callback to save the best performing model during training
+        print('Incorrect loss names')
+        sys.exit()
+    
+    # Compile the model with the specified optimizer, loss function, and metric
+    model.compile(optimizer=opt, loss=loss, metrics=[m])
+    
+    # Create a callback to save the best performing model during training
     save_best = keras.callbacks.ModelCheckpoint(filepath=f'{save_dir}/best_model.h5')
 
 
@@ -172,11 +174,16 @@ if __name__ == "__main__":
                         epochs=epo, batch_size=bs,
                         callbacks=[save_best,WandbCallback(save_model=False)],
                         shuffle=True, use_multiprocessing=True, verbose=False)
-
-    # find the minimum root mean squared error on the validation data during training
-    best_rmse = min(history.history['val_root_mean_squared_error'])
-
-    # print the best root mean squared error and the number of nodes in the first dense layer (l)
-    print(f'RMSE:{best_rmse:.3f} with L-{l}')
-    wandb.log({"val_RMSE": best_rmse})
-    # os.rename(save_dir, f'{save_dir}_{best_rmse:.3f}')
+   
+        # Print the best binary accuracy
+        print(f'best_binary_accuracy: {best_value:.3f}')
+        
+        def log_best_binary_accuracy(history):
+            # Find the maximum binary accuracy on the validation data during training
+            best_value = max(history.history['val_binary_accuracy'])
+        
+        # Log the best binary accuracy using W&B
+        wandb.log({"best_binary_accuracy": best_value})
+    
+    # Call the function and pass the training history
+    log_best_binary_accuracy(history)

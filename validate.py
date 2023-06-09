@@ -32,9 +32,10 @@ if __name__ == "__main__":
     x_val = val.iloc[:, 0:2].values
     y_val = val.iloc[:, 3:].values
 
-    run = 'sweep'
+    run = 'sweep_23'
     model = keras.models.load_model(f'training/{run}/best_model.h5')
-    RMSE = keras.metrics.RootMeanSquaredError()
+    # RMSE = keras.metrics.RootMeanSquaredError()
+    RMSE = keras.metrics.BinaryAccuracy()
 
     pred = model.predict(x_val)
 
