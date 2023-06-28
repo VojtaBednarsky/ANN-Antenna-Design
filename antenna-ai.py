@@ -2,6 +2,7 @@
 from tensorflow import keras
 from keras.layers import Dense, Dropout, Input, Embedding
 import tensorflow as tf
+import numpy as np
 from keras import regularizers
 import pandas as pd
 import os
@@ -78,11 +79,20 @@ if __name__ == "__main__":
     train = data.iloc[:l, :]
     val = data.iloc[l:, :]
 
+
+
     # extract the input and output values for the training set
     # [vstupem do neuronky jsou nejnižší dvě rezonanční frekvence]
     x_train = train.iloc[:, 0:2].values
     # [výstupní hodnoty pro trénovací možinu je vektor 100 hodnot 0-1 popisující design]
     y_train = train.iloc[:, 3:].values
+
+    #############################################################################################################
+    # DATA AUGMENTATION
+    noise = np.random.normal(0, .05, x_train.shape)
+    x_train2 = x_train + noise
+    x_train = np.concatenate((x_train, x_train2), axis=0)
+    y_train = np.concatenate((y_train, y_train), axis=0)
 
     # extract the input and output values for the validation set
     x_val = val.iloc[:, 0:2].values
