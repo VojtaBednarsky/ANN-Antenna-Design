@@ -1,0 +1,1 @@
+{"lr": 0.01, "epo": 250, "bs": 128, "opt": "Adamax", "m": 0.0, "lr_decay": 0.5, "af": "relu", "af2": "relu", "u": 64, "u2": 128, "layers": 5, "met": "BACC", "loss": "lBCross", "_timestamp": 1687963356.5652814, "_runtime": 390.42202949523926, "_step": 5}

@@ -69,7 +69,7 @@ if __name__ == "__main__":
 
     # import PDE dataset
     # [import datasetu + nutnost oddělovače]
-    data = pd.read_csv('data_set_csv.csv', sep=',')
+    data = pd.read_csv('dataset.csv', sep=';')
 
     # calculate the index to split the data into training and validation sets
     # *[rozdělení dat na trénovací a validační 80% trénovací + 20% validační]
@@ -122,7 +122,7 @@ if __name__ == "__main__":
     # add a dropout layer to prevent overfitting
     model.add(Dropout(.10))
     # add a dense output layer with 100 nodes and softmax activation function
-    model.add(Dense(units=100, activation='sigmoid', kernel_initializer=initializer))
+    model.add(Dense(units=144, activation='sigmoid', kernel_initializer=initializer))
 
     # Choose the optimizer with the specified learning rate
     if opt_name == 'Adam':
@@ -172,8 +172,8 @@ if __name__ == "__main__":
     # train the model on the training data and evaluate it on the validation data
     history = model.fit(x_train, y_train, validation_data=(x_val, y_val),
                         epochs=epo, batch_size=bs,
-                        callbacks=[save_best, WandbCallback()],
-                        shuffle=True, use_multiprocessing=True, verbose=True)
+                        callbacks=[WandbCallback()],
+                        shuffle=True, use_multiprocessing=True, verbose=False)
 
     # def log_best_binary_accuracy(history):
     #     # Find the maximum binary accuracy on the validation data during training

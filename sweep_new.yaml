@@ -1,0 +1,43 @@
+method: grid
+metric:
+  goal: minimize
+  name: val_root_mean_squared_error
+parameters:
+  af2:
+    values:
+      - tanh
+      - sigmoid
+      - relu
+  af:
+    values:
+      - tanh
+      - sigmoid
+      - relu
+
+  layers:
+    values:
+      - 2
+      - 4
+      - 6
+  opt:
+    values:
+      - Adamax
+      - RMSprop
+  u:
+    values:
+      - 16
+      - 64
+  u2:
+    values:
+      - 16
+      - 64
+  met:
+    values:
+      - BACC
+      - PREC
+  loss:
+    values:
+      - lBCross
+      - lLC 
+  
+program: antenna-ai.py

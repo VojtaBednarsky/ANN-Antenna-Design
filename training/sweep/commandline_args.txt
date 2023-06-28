@@ -1,13 +1,15 @@
 {
   "lr": 0.01,
   "epo": 250,
-  "bs": 256,
+  "bs": 128,
   "opt": "Adamax",
   "m": 0.0,
   "lr_decay": 0.5,
   "af": "relu",
   "af2": "relu",
-  "u": 128,
-  "u2": 16,
-  "layers": 2
+  "u": 64,
+  "u2": 128,
+  "layers": 5,
+  "met": "BACC",
+  "loss": "lBCross"
 }
