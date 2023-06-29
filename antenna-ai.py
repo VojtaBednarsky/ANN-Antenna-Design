@@ -16,7 +16,7 @@ import sys
 # visibility of the settings weights and more other parameters
 #https://netron.app/
 
-wandb.login(key='24105b2510470e8d99c2a27e9d5c53f3934aa355')
+wandb.login(key='7d128b1af6ed0cbb4897a398ed4dc3196c828387')
 wandb.init(project="Antenna_model", entity="vojta-bednarsky")
 
 
@@ -182,8 +182,8 @@ if __name__ == "__main__":
     # train the model on the training data and evaluate it on the validation data
     history = model.fit(x_train, y_train, validation_data=(x_val, y_val),
                         epochs=epo, batch_size=bs,
-                        callbacks=[WandbCallback()],
-                        shuffle=True, use_multiprocessing=True, verbose=False)
+                        callbacks=[],
+                        shuffle=True, use_multiprocessing=True, verbose=True)
 
     # def log_best_binary_accuracy(history):
     #     # Find the maximum binary accuracy on the validation data during training
