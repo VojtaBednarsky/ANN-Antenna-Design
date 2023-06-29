@@ -16,14 +16,14 @@ import sys
 # visibility of the settings weights and more other parameters
 #https://netron.app/
 
-wandb.login(key='7d128b1af6ed0cbb4897a398ed4dc3196c828387')
+wandb.login(key='24105b2510470e8d99c2a27e9d5c53f3934aa355')
 wandb.init(project="Antenna_model", entity="ann_antenna_project")
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Process some integers.')
     parser.add_argument('--lr', type=float, default=0.01, help='Learning rate')
-    parser.add_argument('--epo', type=int, default=250, help='Number of epochs')
+    parser.add_argument('--epo', type=int, default=100, help='Number of epochs')
     parser.add_argument('--bs', type=int, default=1024, help='Batch size')
     parser.add_argument('--opt', type=str, default='Adamax', help='Optimizer')
     parser.add_argument('--m', type=float, default=0.0, help='Momentum for SDG optimizer')
