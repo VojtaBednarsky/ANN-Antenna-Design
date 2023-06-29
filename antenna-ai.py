@@ -17,14 +17,14 @@ import sys
 #https://netron.app/
 
 wandb.login(key='7d128b1af6ed0cbb4897a398ed4dc3196c828387')
-wandb.init(project="Antenna_model", entity="vojta-bednarsky")
+wandb.init(project="Antenna_model", entity="ann_antenna_project")
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Process some integers.')
     parser.add_argument('--lr', type=float, default=0.01, help='Learning rate')
     parser.add_argument('--epo', type=int, default=250, help='Number of epochs')
-    parser.add_argument('--bs', type=int, default=128, help='Batch size')
+    parser.add_argument('--bs', type=int, default=1024, help='Batch size')
     parser.add_argument('--opt', type=str, default='Adamax', help='Optimizer')
     parser.add_argument('--m', type=float, default=0.0, help='Momentum for SDG optimizer')
     parser.add_argument('--lr_decay', type=float, default=0.5, help='Learning rate decay')
@@ -182,8 +182,8 @@ if __name__ == "__main__":
     # train the model on the training data and evaluate it on the validation data
     history = model.fit(x_train, y_train, validation_data=(x_val, y_val),
                         epochs=epo, batch_size=bs,
-                        callbacks=[],
-                        shuffle=True, use_multiprocessing=True, verbose=True)
+                        callbacks=[WandbCallback(save_model=False)],
+                        shuffle=True, use_multiprocessing=True, verbose=False)
 
     # def log_best_binary_accuracy(history):
     #     # Find the maximum binary accuracy on the validation data during training
